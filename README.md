@@ -125,6 +125,6 @@ x509 -engine pkcs11 -CAserial=serial -CAkeyform engine -CAkey id_02 -sha256 -CA 
 
 ## Revoke certyficate
  * First you need to locate particular certyficate file. List file `index.txt`
- * Third column is a HEX number of signed cert. If your certyficate to revoke has for example number 07, file with that certyficate is localted in certs/07.pem
+ * Third column is a HEX number of signed cert. If your certyficate to revoke has for example number 07, file with that certyficate is localted in certs/1001.pem
  * To revoke that cert please issue command:
-  `openssl ca -config openssl.conf -revoke certs/07.pem -engine pkcs11 -keyfile id_02 -keyform engine -updatedb -cert certs/00.pem`
+  `openssl ca -config openssl.conf -revoke certs/1001.pem -engine pkcs11 -keyfile id_02 -keyform engine -updatedb -cert certs/intermediate_cert.pem`

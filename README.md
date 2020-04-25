@@ -1,10 +1,10 @@
 # CA + yubikey guide 
 
 ## About CA and SUBCA
- * CA key is stored in keepass
- * CA certyfiicate is stored `certs/cacert.pem` and in keepass
+ * CA key is stored in KeePass
+ * CA certificate is stored `certs/cacert.pem` and in KeePass
  * SUBCA key is stored on yubikey
- * SUBCA certyficate is stored `newcerts/1000.pem` on yubikey and in keepass
+ * SUBCA certificate is stored `newcerts/1000.pem` on yubikey and in KeePass
  * List of signed certs `index.txt`
 
 -----
@@ -26,8 +26,8 @@ echo '1000' > serial
 
 -----
 ## CA setup
-### 1. Generate CA master key and self signed certyficate
-  *This will be a master CA what is stored in keepass and used only to generate internediate keypairs for operational pursposes. Never ever use it for signing requests. Never unpack it form keepass except to generate new intermediate CA. Always use **RAM memory** or encrypted disk when you download it form keepass* 
+### 1. Generate CA master key and self-signed certificate
+  *This will be a master CA what is stored in KeePass and used only to generate intermediate keypairs for operational purposes. Never use it for signing requests. Never unpack it form KeePass except to generate new intermediate CA. Always use **RAM** or encrypted disk when you download it form KeePass.* 
 ```
 openssl req -config openssl.conf -new -newkey rsa:4096 -x509 -sha512 -extensions v3_ca -keyout keys/cakey.pem -out certs/cacert.pem -days 365000 -set_serial 0
 ```
@@ -35,7 +35,7 @@ Now you have:
  * `keys/cakey.pem` - secret key of your master CA
  * `carts/cacert.pem` - secret cert of your master CA
 
-Please copy then and password for cakey.pem to keepass. Do not remove them yet. We will need those later.
+Please copy then and password for cakey.pem to KeePass. Do not remove them yet. We will need those later.
 
 -----
 
@@ -54,8 +54,8 @@ openssl ca -config openssl.conf -extensions v3_intermediate_ca -days 3650 -notex
 
 ln -s 1000.pem certs/intermediate_cert.pem
 ```
-### 3. Upload certyficate to yubikey
-After step 2 you should have your signed certyficate in `/dev/shm/certs/1000.pem`. Please open pivman and upload your signed cert to slot 9c. Additionally save it in keepass.
+### 3. Upload certificate to yubikey
+After step 2 you should have your signed certificate in `/dev/shm/certs/1000.pem`. Please open pivman and upload your signed cert to slot 9c. Additionally save it in KeePass.
 
 
 -----
@@ -70,7 +70,7 @@ After step 2 you should have your signed certyficate in `/dev/shm/certs/1000.pem
  * `serial` - should contain number 1001 (if you have only 1 yubikey)
  * `index.txt` - should contain only one entry (if you have 1 yubikey)
 
-### 2. Now we remove private key and other unnecessary informations and move our CA directory to more persistent location:
+### 2. Now we remove the private key and other unnecessary information and move our CA directory to the more persistent location:
 
 ```
 rm keys/cakey.pem requests/intermediate_req.pem 
@@ -80,7 +80,7 @@ mv /dev/shm/ca ~/ca
 -----
 
 
-## Generate new key and certyficate request for openvpn server (as example)
+## Generate new key and certificate request for OpenVPN server (as an example)
 
 ### 1. All at once - recommended
 ```
@@ -123,8 +123,13 @@ engine dynamic -pre SO_PATH:/usr/lib/engines-1.1/libpkcs11.so -pre ID:pkcs11 -pr
 x509 -engine pkcs11 -CAserial=serial -CAkeyform engine -CAkey id_02 -sha256 -CA certs/intermediate_cert.pem -req -in requests/openvpn_req.pem -out certs/openvpn_cert.pem
 ```
 
-## Revoke certyficate
- * First you need to locate particular certyficate file. List file `index.txt`
- * Third column is a HEX number of signed cert. If your certyficate to revoke has for example number 07, file with that certyficate is localted in certs/1001.pem
- * To revoke that cert please issue command:
-  `openssl ca -config openssl.conf -revoke certs/1001.pem -engine pkcs11 -keyfile id_02 -keyform engine -updatedb -cert certs/intermediate_cert.pem`
+-----
+
+## Revoke a certificate
+ * First you need to locate a particular certificate file. List file `index.txt`
+ * The Third column is a HEX number of signed cert. If your certificate to revoke has for example number 1001, file with that certificate is located in `certs/1001.pem`
+ * To revoke that cert please issue the command:
+  
+```
+openssl ca -config openssl.conf -revoke certs/1001.pem -engine pkcs11 -keyfile id_02 -keyform engine -updatedb -cert certs/intermediate_cert.pem
+```

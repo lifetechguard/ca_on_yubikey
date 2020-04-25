@@ -1,0 +1,7 @@
+./private/
+./keys/
+./crl/
+./requests/
+./certs/
+./index*
+./serial*
